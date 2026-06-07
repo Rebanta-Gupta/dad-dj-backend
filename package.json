@@ -1,0 +1,30 @@
+{
+  "name": "dad-dj-backend",
+  "version": "1.0.0",
+  "description": "Backend service powering **Dad DJ**, a Spotify‑connected, DJ‑style playlist generator built as a personalized Father’s Day gift.",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Rebanta-Gupta/dad-dj-backend.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/Rebanta-Gupta/dad-dj-backend/issues"
+  },
+  "homepage": "https://github.com/Rebanta-Gupta/dad-dj-backend#readme",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.107.0",
+    "axios": "^1.17.0",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "groq-sdk": "^1.2.1"
+  }
+}

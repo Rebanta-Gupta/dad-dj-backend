@@ -1,11 +1,7 @@
 // src/services/token.service.js
-
 import { Queries } from "../db/queries.js";
 import { encrypt, decrypt } from "../utils/crypto.js";
 
-//
-// Save tokens securely
-//
 export const saveSpotifyTokens = async (userId, tokens) => {
   await Queries.saveSpotifyTokens(userId, {
     spotify_user_id: tokens.spotify_user_id,
@@ -15,12 +11,8 @@ export const saveSpotifyTokens = async (userId, tokens) => {
   });
 };
 
-//
-// Get + decrypt tokens
-//
 export const getSpotifyTokens = async (userId) => {
   const data = await Queries.getSpotifyTokens(userId);
-
   return {
     ...data,
     access_token: decrypt(data.access_token),
@@ -28,9 +20,6 @@ export const getSpotifyTokens = async (userId) => {
   };
 };
 
-//
-// Update access token only
-//
 export const updateAccessToken = async (userId, accessToken) => {
   await Queries.updateAccessToken(userId, encrypt(accessToken));
 };

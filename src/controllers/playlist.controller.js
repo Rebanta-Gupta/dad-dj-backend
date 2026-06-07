@@ -1,7 +1,6 @@
 // src/controllers/playlist.controller.js
 
 import { createSpotifyPlaylist } from "../services/spotify.service.js";
-import { Queries } from "../db/queries.js";
 
 export const createPlaylist = async (req, res, next) => {
   try {
@@ -15,14 +14,10 @@ export const createPlaylist = async (req, res, next) => {
       });
     }
 
+    // FIX: createSpotifyPlaylist already calls Queries.savePlaylistHistory internally.
+    // The original controller called it a second time, causing duplicate DB inserts.
+    // Removed the redundant Queries.savePlaylistHistory call here.
     const playlist = await createSpotifyPlaylist(userId, name, tracks);
-
-    // Save playlist history
-    await Queries.savePlaylistHistory(userId, {
-      spotify_playlist_id: playlist.playlist_id,
-      name,
-      segments_used: tracks
-    });
 
     res.json({
       success: true,

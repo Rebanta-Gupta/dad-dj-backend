@@ -4,6 +4,8 @@ import axios from "axios";
 import { config } from "../config/env.js";
 import { spotifyConfig } from "../config/spotify.js";
 import { Queries } from "../db/queries.js";
+// FIX: import token service so tokens are properly decrypted before use
+import { getSpotifyTokens, updateAccessToken } from "./token.service.js";
 
 const TOKEN_URL = spotifyConfig.tokenUrl;
 const SPOTIFY_API = "https://api.spotify.com/v1";
@@ -38,13 +40,15 @@ export const exchangeCodeForTokens = async (code) => {
 
 //
 // Refresh access token
+// FIX: was calling Queries.getSpotifyTokens directly, bypassing decryption.
+// Now uses getSpotifyTokens from token.service which decrypts before returning.
 //
 export const refreshAccessToken = async (userId) => {
-  const tokens = await Queries.getSpotifyTokens(userId);
+  const tokens = await getSpotifyTokens(userId);
 
   const params = new URLSearchParams();
   params.append("grant_type", "refresh_token");
-  params.append("refresh_token", tokens.refresh_token);
+  params.append("refresh_token", tokens.refresh_token); // now correctly decrypted
 
   const res = await axios.post(TOKEN_URL, params, {
     headers: {
@@ -55,7 +59,8 @@ export const refreshAccessToken = async (userId) => {
 
   const newAccess = res.data.access_token;
 
-  await Queries.updateAccessToken(userId, newAccess);
+  // FIX: use updateAccessToken from token.service so it is re-encrypted before storage
+  await updateAccessToken(userId, newAccess);
 
   return newAccess;
 };

@@ -4,16 +4,12 @@ import { Queries } from "../db/queries.js";
 export const getUserPreferences = async (userId) => {
   try {
     const prefs = await Queries.getPreferences(userId);
-
-    // If no preferences exist yet, return defaults
-    return (
-      prefs || {
-        favorite_artists: [],
-        favorite_genres: [],
-        default_mood: "nostalgia",
-        default_segment_style: "classic"
-      }
-    );
+    return prefs || {
+      favorite_artists: [],
+      favorite_genres: [],
+      default_mood: "nostalgia",
+      default_segment_style: "classic"
+    };
   } catch (err) {
     console.error("Error fetching preferences:", err);
     throw new Error("Failed to load preferences");

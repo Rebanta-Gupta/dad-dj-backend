@@ -4,6 +4,36 @@ import { Queries } from "../db/queries.js";
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
+const DEFAULT_PERSONA = {
+  voice_style: "smooth, upbeat dad DJ",
+  intro_template: "Alright folks, buckle up — Dad's got the aux!",
+  transition_template: "And now we're shifting gears...",
+  outro_template: "That's a wrap from your one and only Dad DJ. Stay groovy!"
+};
+
+// FIX: getPersonaForUser was called internally and from persona.controller.js
+// but was never defined or exported. Added here with fallback defaults.
+export const getPersonaForUser = async (userId) => {
+  try {
+    const persona = await Queries.getPersona(userId);
+    return Object.keys(persona).length ? persona : DEFAULT_PERSONA;
+  } catch (err) {
+    console.error("Error fetching persona:", err);
+    return DEFAULT_PERSONA;
+  }
+};
+
+// FIX: savePersonaForUser was referenced in persona.controller.js but missing.
+export const savePersonaForUser = async (userId, persona) => {
+  try {
+    await Queries.savePersona(userId, persona);
+    return { success: true };
+  } catch (err) {
+    console.error("Error saving persona:", err);
+    throw new Error("Failed to save persona");
+  }
+};
+
 export const generateDynamicPersonaLine = async (userId, context) => {
   const persona = await getPersonaForUser(userId);
 

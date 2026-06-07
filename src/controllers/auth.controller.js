@@ -1,3 +1,5 @@
+// src/controllers/auth.controller.js
+
 import { spotifyConfig } from "../config/spotify.js";
 import { config } from "../config/env.js";
 import { exchangeCodeForTokens } from "../services/spotify.service.js";
@@ -10,12 +12,23 @@ export const login = (req, res) => {
   res.redirect(redirect);
 };
 
-export const callback = async (req, res) => {
-  const code = req.query.code;
-  const userId = req.query.state; // Supabase user ID
+export const callback = async (req, res, next) => {
+  try {
+    const code = req.query.code;
+    const userId = req.query.state; // Supabase user ID
 
-  const tokens = await exchangeCodeForTokens(code);
-  await saveSpotifyTokens(userId, tokens);
+    if (!code || !userId) {
+      return res.status(400).json({ error: "Missing code or state param" });
+    }
 
-  res.redirect("https://your-frontend-url.com/dj");
+    const tokens = await exchangeCodeForTokens(code);
+    await saveSpotifyTokens(userId, tokens);
+
+    // FIX: was hardcoded to "https://your-frontend-url.com/dj".
+    // Now reads from FRONTEND_URL env var with a safe fallback.
+    res.redirect(`${config.FRONTEND_URL}/dj`);
+  } catch (err) {
+    console.error("Error in callback:", err);
+    next(err);
+  }
 };
