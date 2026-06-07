@@ -6,8 +6,14 @@ import { exchangeCodeForTokens } from "../services/spotify.service.js";
 import { saveSpotifyTokens } from "../services/token.service.js";
 
 export const login = (req, res) => {
+  const userId = req.query.state;
+
+  if (!userId) {
+    return res.status(400).json({ error: "Missing state param (Supabase user ID)" });
+  }
+
   const scope = spotifyConfig.scopes.join(" ");
-  const redirect = `${spotifyConfig.authorizeUrl}?client_id=${config.SPOTIFY_CLIENT_ID}&response_type=code&redirect_uri=${encodeURIComponent(config.SPOTIFY_REDIRECT_URI)}&scope=${encodeURIComponent(scope)}`;
+  const redirect = `${spotifyConfig.authorizeUrl}?client_id=${config.SPOTIFY_CLIENT_ID}&response_type=code&redirect_uri=${encodeURIComponent(config.SPOTIFY_REDIRECT_URI)}&scope=${encodeURIComponent(scope)}&state=${encodeURIComponent(userId)}`;
 
   res.redirect(redirect);
 };
