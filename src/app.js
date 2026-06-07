@@ -13,6 +13,13 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.get("/health", (req, res) => res.json({ status: "ok" }));
+app.get("/debug", (req, res) => {
+  res.json({
+    supabase_url: process.env.SUPABASE_URL,
+    has_service_key: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
+    key_preview: process.env.SUPABASE_SERVICE_ROLE_KEY?.slice(0, 20)
+  });
+});
 app.use("/auth", authRoutes);
 app.use("/spotify", spotifyRoutes);
 app.use("/segments", segmentRoutes);
