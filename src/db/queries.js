@@ -10,8 +10,12 @@ export const Queries = {
     const { error } = await supabase.from("spotify_tokens").upsert({ user_id: userId, ...tokens, updated_at: new Date() });
     if (error) throw error;
   },
-  updateAccessToken: async (userId, accessToken) => {
-    const { error } = await supabase.from("spotify_tokens").update({ access_token: accessToken, updated_at: new Date() }).eq("user_id", userId);
+  // Now accepts expiresAt so the stored expiry stays in sync after a refresh
+  updateAccessToken: async (userId, accessToken, expiresAt) => {
+    const { error } = await supabase
+      .from("spotify_tokens")
+      .update({ access_token: accessToken, expires_at: expiresAt, updated_at: new Date() })
+      .eq("user_id", userId);
     if (error) throw error;
   },
   getPreferences: async (userId) => {

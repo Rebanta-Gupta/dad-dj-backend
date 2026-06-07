@@ -20,6 +20,7 @@ export const getSpotifyTokens = async (userId) => {
   };
 };
 
-export const updateAccessToken = async (userId, accessToken) => {
-  await Queries.updateAccessToken(userId, encrypt(accessToken));
+// Now also updates expires_at so the expiry check stays accurate after a refresh
+export const updateAccessToken = async (userId, accessToken, expiresAt) => {
+  await Queries.updateAccessToken(userId, encrypt(accessToken), expiresAt);
 };

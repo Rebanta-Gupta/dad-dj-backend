@@ -4,7 +4,6 @@ import axios from "axios";
 import { config } from "../config/env.js";
 import { spotifyConfig } from "../config/spotify.js";
 import { Queries } from "../db/queries.js";
-// FIX: import token service so tokens are properly decrypted before use
 import { getSpotifyTokens, updateAccessToken } from "./token.service.js";
 
 const TOKEN_URL = spotifyConfig.tokenUrl;
@@ -39,16 +38,23 @@ export const exchangeCodeForTokens = async (code) => {
 };
 
 //
-// Refresh access token
-// FIX: was calling Queries.getSpotifyTokens directly, bypassing decryption.
-// Now uses getSpotifyTokens from token.service which decrypts before returning.
+// Refresh access token only if expired (or within 60s of expiry).
+// Saves a Spotify API round-trip on every request when the token is still valid.
 //
+const EXPIRY_BUFFER_MS = 60 * 1000;
+
 export const refreshAccessToken = async (userId) => {
   const tokens = await getSpotifyTokens(userId);
 
+  const isExpired = !tokens.expires_at || Date.now() >= tokens.expires_at - EXPIRY_BUFFER_MS;
+
+  if (!isExpired) {
+    return tokens.access_token;
+  }
+
   const params = new URLSearchParams();
   params.append("grant_type", "refresh_token");
-  params.append("refresh_token", tokens.refresh_token); // now correctly decrypted
+  params.append("refresh_token", tokens.refresh_token);
 
   const res = await axios.post(TOKEN_URL, params, {
     headers: {
@@ -58,9 +64,9 @@ export const refreshAccessToken = async (userId) => {
   });
 
   const newAccess = res.data.access_token;
+  const newExpiresAt = Date.now() + res.data.expires_in * 1000;
 
-  // FIX: use updateAccessToken from token.service so it is re-encrypted before storage
-  await updateAccessToken(userId, newAccess);
+  await updateAccessToken(userId, newAccess, newExpiresAt);
 
   return newAccess;
 };
