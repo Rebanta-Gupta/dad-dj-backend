@@ -20,6 +20,17 @@ app.get("/debug", (req, res) => {
     key_preview: process.env.SUPABASE_SERVICE_ROLE_KEY?.slice(0, 20)
   });
 });
+app.get("/debug-db", async (req, res) => {
+  try {
+    const { supabase } = await import("./config/supabase.js");
+    const { data, error } = await supabase
+      .from("spotify_tokens")
+      .select("*");
+    res.json({ data, error });
+  } catch (err) {
+    res.json({ caught: err.message });
+  }
+});
 app.use("/auth", authRoutes);
 app.use("/spotify", spotifyRoutes);
 app.use("/segments", segmentRoutes);
